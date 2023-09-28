@@ -1,0 +1,159 @@
+﻿<Window x:Class="lab1.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:lab1"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800"
+        >
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="\Resources\Style\WindowStyle.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    
+    <Grid>
+        <Grid.Background>
+            <ImageBrush ImageSource="\Resources\Images\main_bg2.jpg"/>
+        </Grid.Background>
+        <TabControl x:Name="MainTabControl">
+            <TabItem Header="Main">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="49*"></ColumnDefinition>
+                        <ColumnDefinition Width="22*"/>
+                        <ColumnDefinition Width="194*"/>
+                        <ColumnDefinition Width="529*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                    </Grid.RowDefinitions>
+
+                    <Button x:Name="GiveBtn"
+                            Grid.Column="0" 
+                            Grid.Row="0"
+                            
+                            Height="70px"
+                            Content="Give book" 
+                            FontSize="45px" 
+                            Click="GiveBtn_Click" Grid.ColumnSpan="3" Margin="10,33,10,32"
+                            >
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="BorderBrush" Value="#00BC22" />
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+
+                    <Button x:Name="BooksBtn"
+                            Grid.Column="0" 
+                            Grid.Row="1"
+                            
+                            Height="70px"
+                            Content="Books" 
+                            FontSize="45px"
+                            Click="BooksBtn_Click" Grid.ColumnSpan="3" Margin="10,33,10,33"
+                            >
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="BorderBrush" Value="Red" />
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+
+                    <Button x:Name="UsersBtn"
+                            Grid.Column="0" 
+                            Grid.Row="2"
+                            
+                            Content="Users" 
+                            Height="70px"
+                            FontSize="45px"
+                            Click="UsersBtn_Click" Grid.ColumnSpan="3" Margin="10,32,10,33"
+                            >
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="BorderBrush" Value="Blue" />
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                </Grid>
+            </TabItem>
+            <TabItem Header="User"
+                     Margin="2,0,2,0">
+                <StackPanel>
+                    <ScrollViewer>
+                        <StackPanel>
+                            <ListView FontSize="40" 
+                                  Foreground="Black"
+                                  Name="ListUsers"  >
+                                <ListView.View>
+                                    <GridView>
+                                        <GridViewColumn Header="id" 
+                                        DisplayMemberBinding="{Binding Path=Id}"/>
+                                        <GridViewColumn Header="name" 
+                                        DisplayMemberBinding="{Binding Path=Name}"/>
+                                        <GridViewColumn Header="lastname" 
+                                         DisplayMemberBinding="{Binding Path=Lastname}"/>
+                                        <GridViewColumn Header="email" 
+                                        DisplayMemberBinding="{Binding Path=Email}"/>
+                                    </GridView>
+                                </ListView.View>
+                            </ListView>
+
+                            <Label>Search Name:</Label>
+                            <TextBox Name="InputTextName" TextChanged="InputTextName_TextChanged" />
+                            <Label>Search Lastname:</Label>
+                            <TextBox Name="InputTextLastname" TextChanged="InputTextLastname_TextChanged"/>
+
+                        </StackPanel>
+                    </ScrollViewer>
+
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="Book">
+                <StackPanel>
+                    <ListView FontSize="40" Name="ListBook">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="id" 
+                                     DisplayMemberBinding="{Binding Path=Id}"/>
+                                <GridViewColumn Header="author" 
+                                     DisplayMemberBinding="{Binding Path=Author}"/>
+                                <GridViewColumn Header="title" 
+                                     DisplayMemberBinding="{Binding Path=Title}"/>
+                                <GridViewColumn Header="releaseDate" 
+                                     DisplayMemberBinding="{Binding ReleaseDate, StringFormat=d}" />
+                                <GridViewColumn Header="count" 
+                                     DisplayMemberBinding="{Binding Path=Count}"/>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                    <Label>Search Author:</Label>
+                    <TextBox Name="InputTextAuthor" TextChanged="InputTextAuthor_TextChanged" />
+                    <Label>Search Title:</Label>
+                    <TextBox Name="InputTextTitle" TextChanged="InputTextTitle_TextChanged" />
+                </StackPanel>
+            </TabItem>
+
+
+            <TabItem Header="Give"
+                     Margin="2 0 2 0">
+                <StackPanel>
+                    <Label>Select user:</Label>
+                    <ComboBox Name="UserComboBox"  Height="50" />
+                    <Label>Select book's title:</Label>
+                    <ComboBox Name="BookComboBox"  Height="50" />
+                    <Label>Enter number:</Label>
+                    <TextBox Name="InputCount" TextChanged="InputTCount_TextChanged" />
+                    <Button Content="Add" Click="ButtonAdd_Click"/>
+                    <Button Content="Retern" Click="ButtonReturn_Click"/>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
