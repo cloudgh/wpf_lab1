@@ -43,5 +43,18 @@ namespace lab1.Model
 
         public string FullBook => $"{Title} .Books left: {Count}";
     }
-   
+    public class IssuedBookRecord
+    {
+        public User User { get; set; }
+        public Book Book { get; set; }
+        public int Quantity { get; set; }
+    }
+
+    public class ReturnedBookRecord
+    {
+        public User User { get; set; }
+        public Book Book { get; set; }
+        public int Quantity { get; set; }
+    }
+
 }

@@ -8,6 +8,7 @@ using System.Linq;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Reflection.Metadata.BlobBuilder;
 using System.Windows.Media;
+using System.Text;
 
 namespace lab1
 {
@@ -38,7 +39,8 @@ namespace lab1
             new Book(7, "Gabriel Garcia Marquez", "One Hundred Years of Solitude", new DateTime(1967, 5, 30), 2),
             new Book(8, "Mark Twain", "The Adventures of Tom Sawyer", new DateTime(1876, 12, 1), 1)
         };
-        Dictionary<string, int> dic = new Dictionary<string, int>();
+        private List<IssuedBookRecord> issuedBooks = new List<IssuedBookRecord>();
+        private List<ReturnedBookRecord> returnedBooks = new List<ReturnedBookRecord>();
         public MainWindow()
         {
             InitializeComponent();
@@ -129,34 +131,39 @@ namespace lab1
         {
             FilterBooks_title(InputTextTitle.Text);
         }
-        string issuedBooksMessage = "Список выданных книг:\n";
 
         private void ButtonAdd_Click(object sender, RoutedEventArgs e)
         {
-            if(UserComboBox.SelectedItem is User selectedUser && BookComboBox.SelectedItem is Book selectedBook && inputValue > 0 && selectedBook.Count >= inputValue)
-             {
-                selectedBook.Count -= inputValue;
-                
-                if (dic.ContainsKey(selectedBook.Title))
+            if (UserComboBox.SelectedItem is User selectedUser && BookComboBox.SelectedItem is Book selectedBook && inputValue > 0 && selectedBook.Count >= inputValue)
+            {
+                var issuedRecord = issuedBooks.FirstOrDefault(record => record.User == selectedUser && record.Book == selectedBook);
+                if (issuedRecord != null)
                 {
-                    dic[selectedBook.Title] += inputValue;
+                    selectedBook.Count -= inputValue;
+                    issuedRecord.Quantity += inputValue;
                 }
                 else
                 {
-                    dic[selectedBook.Title] = inputValue;
+                    issuedBooks.Add(new IssuedBookRecord
+                    {
+                        User = selectedUser,
+                        Book = selectedBook,
+                        Quantity = inputValue
+                    });
                 }
-
-                foreach (var entry in dic)
+                StringBuilder issuedBooksStringBuilder = new StringBuilder("Список выданных книг:\n");
+                foreach (var record in issuedBooks)
                 {
-                    issuedBooksMessage += $"{entry.Key}: {entry.Value} шт.\n";
+                    issuedBooksStringBuilder.AppendLine($"Пользователь: {record.User.FullName}, Книга: {record.Book.Title}, Количество: {record.Quantity} шт.");
                 }
-                MessageBox.Show($"{inputValue} Книг(a/и/ ) \"{selectedBook.Title}\" успешно выдана пользователю {selectedUser.FullName}.\n\n{issuedBooksMessage}", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
 
+                MessageBox.Show($"{inputValue} Книг(a/и/ ) \"{selectedBook.Title}\" успешно выдана пользователю {selectedUser.FullName}.\n\n{issuedBooksStringBuilder}", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             else
             {
                 MessageBox.Show("Упс. Похоже, вы не можете выдать книгу. Проверьте корректность введенных значений.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }   
+            }
+            
             ListBook.Items.Refresh();
             BookComboBox.Items.Refresh();
         }
@@ -181,35 +188,38 @@ namespace lab1
         {
             if (UserComboBox.SelectedItem is User selectedUser && BookComboBox.SelectedItem is Book selectedBook && inputValue > 0)
             {
-                if (inputValue <= dic.GetValueOrDefault(selectedBook.Title, 0))
+                var issuedRecord = issuedBooks.FirstOrDefault(record => record.User == selectedUser && record.Book == selectedBook);
+                if (issuedRecord != null && inputValue <= issuedRecord.Quantity)
                 {
                     selectedBook.Count += inputValue;
+                    issuedRecord.Quantity -= inputValue;
 
-                    dic[selectedBook.Title] -= inputValue;
+                    if (issuedRecord.Quantity <= 0)
+                    {
+                        issuedBooks.Remove(issuedRecord);
+                    }
+                    StringBuilder issuedBooksStringBuilder = new StringBuilder("Список выданных книг:\n");
 
-                    if (dic[selectedBook.Title] <= 0)
+                    foreach (var record in issuedBooks)
                     {
-                        dic.Remove(selectedBook.Title);
+                        issuedBooksStringBuilder.AppendLine($"Пользователь: {record.User.FullName}, Книга: {record.Book.Title}, Количество: {record.Quantity} шт.");
                     }
-                    foreach (var entry in dic)
-                    {
-                        issuedBooksMessage += $"{entry.Key}: {entry.Value} шт.\n";
-                    }
-                    MessageBox.Show($"Книга \"{selectedBook.Title}\" успешно возвращена пользователем {selectedUser.FullName}.\n\n{issuedBooksMessage}", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    MessageBox.Show($"Книга \"{selectedBook.Title}\" успешно возвращена пользователем {selectedUser.FullName}.\n\n{issuedBooksStringBuilder}", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
+                
                 else
                 {
-                    MessageBox.Show("Вы не можете вернуть больше книг, чем взяли.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Вы не можете вернуть больше книг, чем брали, или данный пользователь не брал данную книгу.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             else
             {
                 MessageBox.Show("Упс. Похоже, вы не можете выполнить возврат книги. Проверьте корректность введенных значений.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-        
+
             ListBook.Items.Refresh();
             BookComboBox.Items.Refresh();
-            
         }
 
         private void InputTCount_TextChanged(object sender, TextChangedEventArgs e)
