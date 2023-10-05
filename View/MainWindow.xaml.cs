@@ -39,8 +39,17 @@ namespace lab1
             new Book(7, "Gabriel Garcia Marquez", "One Hundred Years of Solitude", new DateTime(1967, 5, 30), 2),
             new Book(8, "Mark Twain", "The Adventures of Tom Sawyer", new DateTime(1876, 12, 1), 1)
         };
-        private List<IssuedBookRecord> issuedBooks = new List<IssuedBookRecord>();
-        private List<ReturnedBookRecord> returnedBooks = new List<ReturnedBookRecord>();
+        private List<UserBook> userBooks = new List<UserBook>();
+        private void ShowSuccessMessage(string userName, string bookTitle, int quantity, string action)
+        {
+            StringBuilder userBooksStringBuilder = new StringBuilder("Список выданных книг:\n");
+            foreach (var record in userBooks)
+            {
+                userBooksStringBuilder.AppendLine($"Пользователь: {record.User.FullName}, Книга: {record.Book.Title}, Количество: {record.Quantity} шт.");
+            }
+
+            MessageBox.Show($"Книга \"{bookTitle}\" успешно {action} пользователем {userName}.\n\n{userBooksStringBuilder}", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
         public MainWindow()
         {
             InitializeComponent();
@@ -57,6 +66,7 @@ namespace lab1
             UserComboBox.ItemsSource = user;
             BookComboBox.DisplayMemberPath = "FullBook";
             BookComboBox.ItemsSource = book;
+            ListUsersBook.ItemsSource = userBooks;
         }
 
        
@@ -131,42 +141,37 @@ namespace lab1
         {
             FilterBooks_title(InputTextTitle.Text);
         }
-
+        private void UpdateUI()
+        {
+            ListUsersBook.Items.Refresh();
+            ListBook.Items.Refresh();
+            BookComboBox.Items.Refresh();
+        }
         private void ButtonAdd_Click(object sender, RoutedEventArgs e)
         {
             if (UserComboBox.SelectedItem is User selectedUser && BookComboBox.SelectedItem is Book selectedBook && inputValue > 0 && selectedBook.Count >= inputValue)
             {
-                var issuedRecord = issuedBooks.FirstOrDefault(record => record.User == selectedUser && record.Book == selectedBook);
-                if (issuedRecord != null)
+                var userBookRecord = userBooks.FirstOrDefault(record => record.User == selectedUser && record.Book == selectedBook);
+                if (userBookRecord != null)
                 {
                     selectedBook.Count -= inputValue;
-                    issuedRecord.Quantity += inputValue;
+                    userBookRecord.Quantity += inputValue;
                 }
                 else
                 {
-                    issuedBooks.Add(new IssuedBookRecord
-                    {
-                        User = selectedUser,
-                        Book = selectedBook,
-                        Quantity = inputValue
-                    });
+                    selectedBook.Count -= inputValue;
+                    userBooks.Add(new UserBook(selectedUser, selectedBook, inputValue));
                 }
-                StringBuilder issuedBooksStringBuilder = new StringBuilder("Список выданных книг:\n");
-                foreach (var record in issuedBooks)
-                {
-                    issuedBooksStringBuilder.AppendLine($"Пользователь: {record.User.FullName}, Книга: {record.Book.Title}, Количество: {record.Quantity} шт.");
-                }
-
-                MessageBox.Show($"{inputValue} Книг(a/и/ ) \"{selectedBook.Title}\" успешно выдана пользователю {selectedUser.FullName}.\n\n{issuedBooksStringBuilder}", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                
+                ShowSuccessMessage(selectedUser.FullName, selectedBook.Title, inputValue, "выдана");
             }
             else
             {
                 MessageBox.Show("Упс. Похоже, вы не можете выдать книгу. Проверьте корректность введенных значений.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            
-            ListBook.Items.Refresh();
-            BookComboBox.Items.Refresh();
+            UpdateUI();
         }
+
         int inputValue;
 
         private void GiveBtn_Click(object sender, RoutedEventArgs e)
@@ -188,26 +193,18 @@ namespace lab1
         {
             if (UserComboBox.SelectedItem is User selectedUser && BookComboBox.SelectedItem is Book selectedBook && inputValue > 0)
             {
-                var issuedRecord = issuedBooks.FirstOrDefault(record => record.User == selectedUser && record.Book == selectedBook);
-                if (issuedRecord != null && inputValue <= issuedRecord.Quantity)
+                var userBookRecord = userBooks.FirstOrDefault(record => record.User == selectedUser && record.Book == selectedBook);
+                if (userBookRecord != null && inputValue <= userBookRecord.Quantity)
                 {
                     selectedBook.Count += inputValue;
-                    issuedRecord.Quantity -= inputValue;
+                    userBookRecord.Quantity -= inputValue;
 
-                    if (issuedRecord.Quantity <= 0)
+                    if (userBookRecord.Quantity <= 0)
                     {
-                        issuedBooks.Remove(issuedRecord);
+                        userBooks.Remove(userBookRecord);
                     }
-                    StringBuilder issuedBooksStringBuilder = new StringBuilder("Список выданных книг:\n");
-
-                    foreach (var record in issuedBooks)
-                    {
-                        issuedBooksStringBuilder.AppendLine($"Пользователь: {record.User.FullName}, Книга: {record.Book.Title}, Количество: {record.Quantity} шт.");
-                    }
-
-                    MessageBox.Show($"Книга \"{selectedBook.Title}\" успешно возвращена пользователем {selectedUser.FullName}.\n\n{issuedBooksStringBuilder}", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                    ShowSuccessMessage(selectedUser.FullName, selectedBook.Title, inputValue, "возвращена");
                 }
-                
                 else
                 {
                     MessageBox.Show("Вы не можете вернуть больше книг, чем брали, или данный пользователь не брал данную книгу.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -217,10 +214,10 @@ namespace lab1
             {
                 MessageBox.Show("Упс. Похоже, вы не можете выполнить возврат книги. Проверьте корректность введенных значений.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-
-            ListBook.Items.Refresh();
-            BookComboBox.Items.Refresh();
+            UpdateUI();
         }
+
+       
 
         private void InputTCount_TextChanged(object sender, TextChangedEventArgs e)
         {

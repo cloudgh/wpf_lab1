@@ -154,6 +154,25 @@
                     <Button Content="Retern" Click="ButtonReturn_Click"/>
                 </StackPanel>
             </TabItem>
+
+            <TabItem Header="UserBook"
+                     Margin="2 0 2 0">
+                <ListView FontSize="40" 
+                          Foreground="Black"
+                          Name="ListUsersBook" >
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Fullname" 
+                                DisplayMemberBinding="{Binding Path=User.FullName}"/>
+                            <GridViewColumn Header="Book title" 
+                                DisplayMemberBinding="{Binding Path=Book.Title}"/>
+                            <GridViewColumn Header="count" 
+                                DisplayMemberBinding="{Binding Path=Quantity}"/>
+                            
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </TabItem>
         </TabControl>
     </Grid>
 </Window>
